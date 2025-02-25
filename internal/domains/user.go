@@ -11,17 +11,17 @@ const (
 )
 
 type User struct {
-	id       int64
-	login    string
-	password string
+	ID       int64
+	Login    string
+	Password string
 }
 
 func (u *User) ValidateLogin() error {
-	if u.login == "" {
+	if u.Login == "" {
 		return fmt.Errorf(ValidateLoginError)
 	}
 	latinRegex := regexp.MustCompile(`^[A-Za-z]+$`)
-	if !latinRegex.MatchString(u.login) {
+	if !latinRegex.MatchString(u.Login) {
 		return fmt.Errorf(ValidateLoginError)
 	}
 
@@ -29,7 +29,7 @@ func (u *User) ValidateLogin() error {
 }
 
 func (u *User) ValidatePassword() error {
-	if len(u.password) < 6 {
+	if len(u.Password) < 6 {
 		return fmt.Errorf(ValidatePasswordError)
 	}
 	return nil
