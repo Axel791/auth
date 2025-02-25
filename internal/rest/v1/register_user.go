@@ -18,7 +18,7 @@ type RegistrationHandler struct {
 	registrationUseCase authScenarios.Registration
 }
 
-func NewRegistration(
+func NewRegistrationHandler(
 	registrationUseCase authScenarios.Registration,
 	logger *log.Logger,
 ) *RegistrationHandler {

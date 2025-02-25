@@ -10,6 +10,7 @@ type Config struct {
 	Address        string `mapstructure:"ADDRESS"`
 	DatabaseDSN    string `mapstructure:"DATABASE_DSN"`
 	SecretKey      string `mapstructure:"SECRET_KEY"`
+	PasswordSecret string `mapstructure:"PASSWORD_SECRET"`
 	MigrationsPath string `mapstructure:"MIGRATIONS_PATH"`
 }
 

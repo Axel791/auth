@@ -1,11 +1,17 @@
 package main
 
 import (
+	"net/http"
+
+	"github.com/Axel791/auth/internal/services"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/Axel791/auth/internal/config"
 	"github.com/Axel791/auth/internal/db"
+	apiV1Handlers "github.com/Axel791/auth/internal/rest/v1"
+	"github.com/Axel791/auth/internal/usecases/auth/repositories"
+	"github.com/Axel791/auth/internal/usecases/auth/scenarios"
 
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -38,4 +44,41 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.Logger)
+
+	// Репозитории
+	userRepository := repositories.NewUserRepository(dbConn)
+
+	// Сервисы
+	tokenService := services.NewTokenService(cfg.SecretKey)
+	passwordService := services.NewHashPasswordService(cfg.PasswordSecret)
+
+	// UseCases
+	validationUseCase := scenarios.NewValidateScenario(userRepository, tokenService)
+	loginUseCase := scenarios.NewLoginScenario(userRepository, passwordService, tokenService)
+	registrationUseCase := scenarios.NewRegistrationScenario(userRepository, passwordService)
+
+	// Routers V1
+	router.Route("/public/api/v1", func(r chi.Router) {
+		r.Method(
+			http.MethodPost,
+			"/users/registration",
+			apiV1Handlers.NewRegistrationHandler(registrationUseCase, log),
+		)
+		r.Method(
+			http.MethodPost,
+			"/users/login",
+			apiV1Handlers.NewLoginHandler(log, loginUseCase),
+		)
+		r.Method(
+			http.MethodPost,
+			"/users/validate",
+			apiV1Handlers.NewValidationHandler(log, validationUseCase),
+		)
+	})
+
+	log.Infof("server started on %s", cfg.Address)
+	err = http.ListenAndServe(cfg.Address, router)
+	if err != nil {
+		log.Fatalf("error starting server: %v", err)
+	}
 }

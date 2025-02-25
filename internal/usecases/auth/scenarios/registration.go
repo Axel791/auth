@@ -18,8 +18,14 @@ type RegistrationScenario struct {
 }
 
 // NewRegistrationScenario - создание сценария
-func NewRegistrationScenario(userRepository repositories.UserRepository) *RegistrationScenario {
-	return &RegistrationScenario{userRepository: userRepository}
+func NewRegistrationScenario(
+	userRepository repositories.UserRepository,
+	hashPasswordService services.HashPasswordService,
+) *RegistrationScenario {
+	return &RegistrationScenario{
+		userRepository:      userRepository,
+		hashPasswordService: hashPasswordService,
+	}
 }
 
 // Execute - Функция выполнения сценария

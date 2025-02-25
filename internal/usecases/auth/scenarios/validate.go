@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Axel791/auth/internal/common"
 	"github.com/Axel791/auth/internal/services"
 	"github.com/Axel791/auth/internal/usecases/auth/repositories"
 )
@@ -26,19 +27,19 @@ func NewValidateScenario(
 }
 
 // Execute - сценарий валидации токена
-func (s *ValidateScenario) Execute(ctx context.Context, token string) (bool, error) {
+func (s *ValidateScenario) Execute(ctx context.Context, token string) error {
 	userClaims, err := s.tokenService.ValidateToken(token)
 	if err != nil {
-		return false, fmt.Errorf("error validating token: %w", err)
+		return common.NewInternalError(fmt.Sprintf("error validating token: %v", err))
 	}
 
 	user, err := s.userRepository.GetUserById(ctx, userClaims.UserID)
 	if err != nil {
-		return false, fmt.Errorf("error getting user by id: %w", err)
+		return common.NewInternalError(fmt.Sprintf("error getting user by id: %v", err))
 	}
 
 	if user.ID == 0 {
-		return false, fmt.Errorf("user not found")
+		return common.NewNotFoundError("user not found")
 	}
-	return true, nil
+	return nil
 }

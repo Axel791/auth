@@ -15,5 +15,5 @@ type Login interface {
 }
 
 type Validate interface {
-	Execute(ctx context.Context, token string) (bool, error)
+	Execute(ctx context.Context, token string) error
 }
