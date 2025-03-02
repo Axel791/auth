@@ -2,9 +2,9 @@ package scenarios
 
 import (
 	"context"
-	"fmt"
+	apikit "github.com/Axel791/appkit"
+	"net/http"
 
-	"github.com/Axel791/auth/internal/common"
 	"github.com/Axel791/auth/internal/services"
 	"github.com/Axel791/auth/internal/usecases/auth/repositories"
 )
@@ -30,16 +30,24 @@ func NewValidateScenario(
 func (s *ValidateScenario) Execute(ctx context.Context, token string) error {
 	userClaims, err := s.tokenService.ValidateToken(token)
 	if err != nil {
-		return common.NewInternalError(fmt.Sprintf("error validating token: %v", err))
+		return apikit.WrapError(
+			http.StatusUnauthorized,
+			"invalid token",
+			err,
+		)
 	}
 
 	user, err := s.userRepository.GetUserById(ctx, userClaims.UserID)
 	if err != nil {
-		return common.NewInternalError(fmt.Sprintf("error getting user by id: %v", err))
+		return apikit.WrapError(
+			http.StatusInternalServerError,
+			"error getting user",
+			err,
+		)
 	}
 
 	if user.ID == 0 {
-		return common.NewNotFoundError("user not found")
+		return apikit.NotFoundError("user not found")
 	}
 	return nil
 }

@@ -2,12 +2,11 @@ package scenarios
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 
-	"github.com/Axel791/auth/internal/usecases/auth/dto"
-
-	appError "github.com/Axel791/auth/internal/common"
+	"github.com/Axel791/appkit"
 	"github.com/Axel791/auth/internal/services"
+	"github.com/Axel791/auth/internal/usecases/auth/dto"
 	"github.com/Axel791/auth/internal/usecases/auth/repositories"
 )
 
@@ -32,17 +31,21 @@ func NewLoginScenario(
 func (s *LoginScenario) Execute(ctx context.Context, userDTO dto.UserDTO) (dto.TokenDTO, error) {
 	user, err := s.userRepository.GetUserByLogin(ctx, userDTO.Login)
 	if err != nil {
-		return dto.TokenDTO{}, appError.NewInternalError(fmt.Sprintf("error getting user by login: %v", err))
+		return dto.TokenDTO{}, apikit.WrapError(
+			http.StatusInternalServerError,
+			"error login user",
+			err,
+		)
 	}
 
 	if user.ID == 0 {
-		return dto.TokenDTO{}, appError.NewNotFoundError("user does not exist")
+		return dto.TokenDTO{}, apikit.NotFoundError("user does not exist")
 	}
 
 	hashedPassword := s.hashPasswordService.Hash(user.Password)
 
 	if hashedPassword != userDTO.Password {
-		return dto.TokenDTO{}, appError.NewBadRequestError("invalid password")
+		return dto.TokenDTO{}, apikit.BadRequestError("invalid password")
 	}
 
 	claims := dto.ClaimsDTO{
@@ -52,7 +55,11 @@ func (s *LoginScenario) Execute(ctx context.Context, userDTO dto.UserDTO) (dto.T
 
 	token, err := s.tokenService.GenerateToken(claims)
 	if err != nil {
-		return dto.TokenDTO{}, appError.NewInternalError(fmt.Sprintf("error generating token: %v", err))
+		return dto.TokenDTO{}, apikit.WrapError(
+			http.StatusInternalServerError,
+			"error user login",
+			err,
+		)
 	}
 	return dto.TokenDTO{Token: token}, nil
 }

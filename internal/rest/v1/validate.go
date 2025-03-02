@@ -2,13 +2,12 @@ package v1
 
 import (
 	"encoding/json"
+	apikit "github.com/Axel791/appkit"
 
-	"github.com/Axel791/auth/internal/common"
 	userAPI "github.com/Axel791/auth/internal/rest/v1/api"
 	authScenarios "github.com/Axel791/auth/internal/usecases/auth/scenarios"
 	log "github.com/sirupsen/logrus"
 
-	"errors"
 	"net/http"
 )
 
@@ -31,21 +30,15 @@ func (h *ValidationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var input userAPI.Token
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		h.logger.Infof("err decode body: %v", err)
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		apikit.WriteErrorJSON(w, apikit.BadRequestError("invalid request body"))
 		return
 	}
 
 	err := h.validationUseCase.Execute(r.Context(), input.Token)
 	if err != nil {
-		var appErr *common.AppError
-
 		h.logger.Infof("err login: %v", err)
-
-		if ok := errors.As(err, &appErr); ok {
-			http.Error(w, appErr.Message, appErr.Code)
-		} else {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-		}
+		apikit.WriteErrorJSON(w, err)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 }

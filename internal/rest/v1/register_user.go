@@ -2,10 +2,8 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
+	apikit "github.com/Axel791/appkit"
 	"net/http"
-
-	"github.com/Axel791/auth/internal/common"
 
 	userAPI "github.com/Axel791/auth/internal/rest/v1/api"
 	"github.com/Axel791/auth/internal/usecases/auth/dto"
@@ -32,7 +30,7 @@ func (h *RegistrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	var input userAPI.User
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		h.logger.Infof("err decode body: %v", err)
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		apikit.WriteErrorJSON(w, apikit.BadRequestError("invalid request body"))
 		return
 	}
 	userDTO := dto.UserDTO{
@@ -42,15 +40,8 @@ func (h *RegistrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	err := h.registrationUseCase.Execute(r.Context(), userDTO)
 	if err != nil {
-		var appErr *common.AppError
-
 		h.logger.Infof("err login: %v", err)
-
-		if ok := errors.As(err, &appErr); ok {
-			http.Error(w, appErr.Message, appErr.Code)
-		} else {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-		}
+		apikit.WriteErrorJSON(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
