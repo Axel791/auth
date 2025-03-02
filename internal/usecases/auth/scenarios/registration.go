@@ -36,16 +36,16 @@ func (s *RegistrationScenario) Execute(ctx context.Context, userDTO dto.UserDTO)
 	}
 
 	if err := userDomain.ValidatePassword(); err != nil {
-		return apikit.ValidationError(err.Error())
+		return appkit.ValidationError(err.Error())
 	}
 
 	if err := userDomain.ValidateLogin(); err != nil {
-		return apikit.ValidationError(err.Error())
+		return appkit.ValidationError(err.Error())
 	}
 
 	user, err := s.userRepository.GetUserByLogin(ctx, userDomain.Login)
 	if err != nil {
-		return apikit.WrapError(
+		return appkit.WrapError(
 			http.StatusInternalServerError,
 			"error getting user by login",
 			err,
@@ -53,7 +53,7 @@ func (s *RegistrationScenario) Execute(ctx context.Context, userDTO dto.UserDTO)
 	}
 
 	if user.ID > 0 {
-		return apikit.BadRequestError("user login already exists")
+		return appkit.BadRequestError("user login already exists")
 	}
 
 	hashedPassword := s.hashPasswordService.Hash(userDomain.Password)
@@ -61,7 +61,7 @@ func (s *RegistrationScenario) Execute(ctx context.Context, userDTO dto.UserDTO)
 
 	err = s.userRepository.CreateUser(ctx, userDomain)
 	if err != nil {
-		return apikit.WrapError(http.StatusInternalServerError, "error creating user", err)
+		return appkit.WrapError(http.StatusInternalServerError, "error creating user", err)
 	}
 	return nil
 }

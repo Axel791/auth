@@ -2,7 +2,7 @@ package v1
 
 import (
 	"encoding/json"
-	apikit "github.com/Axel791/appkit"
+	"github.com/Axel791/appkit"
 
 	userAPI "github.com/Axel791/auth/internal/rest/v1/api"
 	authScenarios "github.com/Axel791/auth/internal/usecases/auth/scenarios"
@@ -30,14 +30,14 @@ func (h *ValidationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var input userAPI.Token
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		h.logger.Infof("err decode body: %v", err)
-		apikit.WriteErrorJSON(w, apikit.BadRequestError("invalid request body"))
+		appkit.WriteErrorJSON(w, appkit.BadRequestError("invalid request body"))
 		return
 	}
 
 	err := h.validationUseCase.Execute(r.Context(), input.Token)
 	if err != nil {
 		h.logger.Infof("err login: %v", err)
-		apikit.WriteErrorJSON(w, err)
+		appkit.WriteErrorJSON(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)

@@ -2,7 +2,7 @@ package v1
 
 import (
 	"encoding/json"
-	apikit "github.com/Axel791/appkit"
+	"github.com/Axel791/appkit"
 	"net/http"
 
 	userAPI "github.com/Axel791/auth/internal/rest/v1/api"
@@ -30,7 +30,7 @@ func (h *RegistrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	var input userAPI.User
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		h.logger.Infof("err decode body: %v", err)
-		apikit.WriteErrorJSON(w, apikit.BadRequestError("invalid request body"))
+		appkit.WriteErrorJSON(w, appkit.BadRequestError("invalid request body"))
 		return
 	}
 	userDTO := dto.UserDTO{
@@ -41,7 +41,7 @@ func (h *RegistrationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	err := h.registrationUseCase.Execute(r.Context(), userDTO)
 	if err != nil {
 		h.logger.Infof("err login: %v", err)
-		apikit.WriteErrorJSON(w, err)
+		appkit.WriteErrorJSON(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

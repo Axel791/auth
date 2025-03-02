@@ -2,7 +2,7 @@ package v1
 
 import (
 	"encoding/json"
-	apikit "github.com/Axel791/appkit"
+	"github.com/Axel791/appkit"
 
 	userAPI "github.com/Axel791/auth/internal/rest/v1/api"
 	"github.com/Axel791/auth/internal/usecases/auth/dto"
@@ -31,7 +31,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var input userAPI.UserLogin
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		h.logger.Infof("err decode body: %v", err)
-		apikit.WriteErrorJSON(w, apikit.BadRequestError("invalid request body"))
+		appkit.WriteErrorJSON(w, appkit.BadRequestError("invalid request body"))
 		return
 	}
 
@@ -43,8 +43,8 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token, err := h.loginUseCase.Execute(r.Context(), loginDTO)
 	if err != nil {
 		h.logger.Infof("err login: %v", err)
-		apikit.WriteErrorJSON(w, err)
+		appkit.WriteErrorJSON(w, err)
 		return
 	}
-	apikit.WriteJSON(w, http.StatusOK, userAPI.Token{Token: token.Token})
+	appkit.WriteJSON(w, http.StatusOK, userAPI.Token{Token: token.Token})
 }

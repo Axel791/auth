@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	github.com/Axel791/appkit v1.0.0 // indirect
+	github.com/Axel791/appkit v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
