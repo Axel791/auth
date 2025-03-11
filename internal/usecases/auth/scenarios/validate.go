@@ -2,8 +2,9 @@ package scenarios
 
 import (
 	"context"
-	"github.com/Axel791/appkit"
 	"net/http"
+
+	"github.com/Axel791/appkit"
 
 	"github.com/Axel791/auth/internal/services"
 	"github.com/Axel791/auth/internal/usecases/auth/repositories"

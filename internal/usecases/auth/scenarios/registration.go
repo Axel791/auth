@@ -2,8 +2,13 @@ package scenarios
 
 import (
 	"context"
-	"github.com/Axel791/appkit"
+	"database/sql"
+	"errors"
+	"fmt"
 	"net/http"
+
+	"github.com/Axel791/appkit"
+	"github.com/Axel791/auth/internal/grpc/v1/pb"
 
 	"github.com/Axel791/auth/internal/domains"
 	"github.com/Axel791/auth/internal/services"
@@ -15,16 +20,19 @@ import (
 type RegistrationScenario struct {
 	userRepository      repositories.UserRepository
 	hashPasswordService services.HashPasswordService
+	loyaltyClient       pb.LoyaltyServiceClient
 }
 
 // NewRegistrationScenario - создание сценария
 func NewRegistrationScenario(
 	userRepository repositories.UserRepository,
 	hashPasswordService services.HashPasswordService,
+	loyaltyClient pb.LoyaltyServiceClient,
 ) *RegistrationScenario {
 	return &RegistrationScenario{
 		userRepository:      userRepository,
 		hashPasswordService: hashPasswordService,
+		loyaltyClient:       loyaltyClient,
 	}
 }
 
@@ -45,11 +53,13 @@ func (s *RegistrationScenario) Execute(ctx context.Context, userDTO dto.UserDTO)
 
 	user, err := s.userRepository.GetUserByLogin(ctx, userDomain.Login)
 	if err != nil {
-		return appkit.WrapError(
-			http.StatusInternalServerError,
-			"error getting user by login",
-			err,
-		)
+		if !errors.Is(err, sql.ErrNoRows) {
+			return appkit.WrapError(
+				http.StatusInternalServerError,
+				"error getting user by login",
+				err,
+			)
+		}
 	}
 
 	if user.ID > 0 {
@@ -59,9 +69,19 @@ func (s *RegistrationScenario) Execute(ctx context.Context, userDTO dto.UserDTO)
 	hashedPassword := s.hashPasswordService.Hash(userDomain.Password)
 	userDomain.Password = hashedPassword
 
-	err = s.userRepository.CreateUser(ctx, userDomain)
+	createdUser, err := s.userRepository.CreateUser(ctx, userDomain)
 	if err != nil {
 		return appkit.WrapError(http.StatusInternalServerError, "error creating user", err)
+	}
+
+	resp, err := s.loyaltyClient.CreateLoyaltyBalance(ctx, &pb.CreateLoyaltyBalanceRequest{
+		UserId: createdUser.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("loyalty service RPC error: %w", err)
+	}
+	if !resp.Success {
+		return fmt.Errorf("loyalty service error: %s", resp.ErrorMessage)
 	}
 	return nil
 }

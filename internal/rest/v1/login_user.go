@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+
 	"github.com/Axel791/appkit"
 
 	userAPI "github.com/Axel791/auth/internal/rest/v1/api"

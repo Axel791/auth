@@ -2,10 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE users(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    login VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-
-
+    login TEXT NOT NULL,
+    password TEXT NOT NULL
 );
 -- +goose StatementEnd
 
