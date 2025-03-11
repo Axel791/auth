@@ -56,7 +56,7 @@ func main() {
 
 	// gRPC
 	conn, err := grpc.NewClient(
-		"localhost:50051",
+		cfg.GrpcAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 // Config - структура конфигурации проекта
 type Config struct {
 	Address        string `mapstructure:"ADDRESS"`
+	GrpcAddress    string `mapstructure:"GRPC_ADDRESS"`
 	DatabaseDSN    string `mapstructure:"DATABASE_DSN"`
 	SecretKey      string `mapstructure:"SECRET_KEY"`
 	PasswordSecret string `mapstructure:"PASSWORD_SECRET"`
