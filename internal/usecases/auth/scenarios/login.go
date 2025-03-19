@@ -56,7 +56,7 @@ func (s *LoginScenario) Execute(ctx context.Context, userDTO dto.UserDTO) (dto.T
 	token, err := s.tokenService.GenerateToken(claims)
 	if err != nil {
 		return dto.TokenDTO{}, appkit.WrapError(
-			http.StatusInternalServerError,
+			http.StatusNotFound,
 			"error user login",
 			err,
 		)
